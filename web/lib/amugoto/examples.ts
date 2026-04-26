@@ -1,4 +1,5 @@
 import type { ToolId } from "@/lib/amugoto/tools";
+import type { TechStackId } from "@/lib/amugoto/stacks";
 import type { DetailedBriefAnswers } from "@/types/amugoto";
 
 export type IndustryExample = {
@@ -8,6 +9,7 @@ export type IndustryExample = {
   summary: string;
   whyItMatters: string;
   tool: ToolId;
+  techStacks: TechStackId[];
   idea: string;
   detailedAnswers: DetailedBriefAnswers;
 };
@@ -22,6 +24,7 @@ export const INDUSTRY_EXAMPLES: IndustryExample[] = [
     whyItMatters:
       "예약과 결제가 같이 들어오면 개인정보와 결제 정보가 섞이기 쉬워서 AMUGOTO의 가치가 잘 드러납니다.",
     tool: "v0",
+    techStacks: ["nextjs", "supabase", "toss-payments", "webhooks"],
     idea:
       "고객들이 피부관리 시술을 예약하고 결제도 할 수 있는 웹앱을 만들고 싶어요. 사장님은 관리자 화면에서 예약자 이름, 연락처, 결제 상태를 보고 예약을 확정하고 싶고, 카드번호도 직접 저장해서 다음 결제 때 다시 쓰고 싶어요.",
     detailedAnswers: {
@@ -51,6 +54,7 @@ export const INDUSTRY_EXAMPLES: IndustryExample[] = [
     whyItMatters:
       "회원 정보, 수업 일정, 운영자 권한이 동시에 얽혀 있어서 안전한 MVP 범위 설정을 보여주기 좋습니다.",
     tool: "lovable",
+    techStacks: ["nextjs", "supabase", "s3-upload"],
     idea:
       "PT샵 회원들이 휴대폰으로 수업 예약을 하고 남은 횟수도 볼 수 있는 앱을 만들고 싶어요. 트레이너는 관리자 페이지에서 모든 회원 정보와 수업 이력을 보고 직접 수정하고 싶어요.",
     detailedAnswers: {
@@ -80,6 +84,7 @@ export const INDUSTRY_EXAMPLES: IndustryExample[] = [
     whyItMatters:
       "상담 분야는 민감한 정보가 섞일 수 있어서 어떤 정보를 받지 말아야 하는지 보여주기 좋습니다.",
     tool: "replit-agent",
+    techStacks: ["express", "prisma-postgres", "webhooks"],
     idea:
       "고객이 익명으로 고민을 남기고 상담을 신청할 수 있는 웹서비스를 만들고 싶어요. 운영자는 모든 상담 내용을 한 화면에서 보고 상담사를 배정하고 싶고, 고객 연락처와 메모를 오래 보관하고 싶어요.",
     detailedAnswers: {
@@ -109,6 +114,7 @@ export const INDUSTRY_EXAMPLES: IndustryExample[] = [
     whyItMatters:
       "개발자용 툴을 쓰는 상황에서 권한 분리와 구현 지시가 어떻게 달라지는지 보여주기 좋습니다.",
     tool: "cursor",
+    techStacks: ["nextjs", "nestjs", "prisma-postgres", "webhooks"],
     idea:
       "사내 운영팀이 각 부서 요청을 접수하고 승인 상태를 관리하는 내부 대시보드를 만들고 싶어요. 관리자는 모든 요청과 작성자를 볼 수 있어야 하고, 일반 직원은 본인 요청만 보게 하고 싶어요.",
     detailedAnswers: {

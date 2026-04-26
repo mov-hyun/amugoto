@@ -2,6 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 
 import { EMPTY_DETAILED_BRIEF_ANSWERS } from "@/lib/amugoto/details";
 import { parseAmugotoResult } from "@/lib/amugoto/parser";
+import { normalizeTechStackIds } from "@/lib/amugoto/stacks";
 import { AMUGOTO_MODEL, buildAmugotoPrompt } from "@/lib/amugoto/prompt";
 import { isToolId } from "@/lib/amugoto/tools";
 import type { DetailedBriefAnswers } from "@/types/amugoto";
@@ -11,12 +12,14 @@ export async function POST(request: Request) {
     const body = (await request.json()) as {
       idea?: unknown;
       selectedTool?: unknown;
+      selectedTechStacks?: unknown;
       detailedAnswers?: Partial<Record<keyof DetailedBriefAnswers, unknown>>;
     };
     const idea = typeof body.idea === "string" ? body.idea.trim() : "";
     const selectedTool = isToolId(body.selectedTool)
       ? body.selectedTool
       : "lovable";
+    const selectedTechStacks = normalizeTechStackIds(body.selectedTechStacks);
     const detailedAnswers = normalizeDetailedAnswers(body.detailedAnswers);
 
     if (!idea) {
@@ -36,7 +39,12 @@ export async function POST(request: Request) {
     }
 
     const ai = new GoogleGenAI({ apiKey });
-    const prompt = buildAmugotoPrompt(idea, selectedTool, detailedAnswers);
+    const prompt = buildAmugotoPrompt(
+      idea,
+      selectedTool,
+      selectedTechStacks,
+      detailedAnswers
+    );
 
     const result = await ai.models.generateContent({
       model: AMUGOTO_MODEL,

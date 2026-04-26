@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 const NAV_ITEMS = [
   { href: "/start", label: "바로 시작" },
   { href: "/examples", label: "업종별 예시" },
+  { href: "/roles", label: "역할별 주의사항" },
 ];
 
 function isActivePath(pathname: string, href: string) {

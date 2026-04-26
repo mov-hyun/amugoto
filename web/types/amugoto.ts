@@ -49,6 +49,17 @@ export type DeepSecurityControlBlueprint = {
   validationSteps: string[];
 };
 
+export type DeepSecurityExecutionTicket = {
+  id: string;
+  owner: "frontend" | "backend" | "qa" | "ops";
+  priority: "P0" | "P1" | "P2";
+  title: string;
+  rationale: string;
+  tasks: string[];
+  acceptanceCriteria: string[];
+  references: string[];
+};
+
 export type DeepSecurityReport = {
   overallAssessment: string;
   executiveSummary: string;
@@ -61,6 +72,7 @@ export type DeepSecurityReport = {
   abuseCases: string[];
   stackSpecificGuidance: DeepSecurityStackGuide[];
   controlBlueprints: DeepSecurityControlBlueprint[];
+  executionTickets: DeepSecurityExecutionTicket[];
   attackScenarios: DeepSecurityAttackScenario[];
   requiredControls: string[];
   verificationChecklist: string[];

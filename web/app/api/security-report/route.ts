@@ -6,6 +6,7 @@ import {
   parseDeepSecurityReport,
 } from "@/lib/amugoto/security-report";
 import { AMUGOTO_DEEP_SECURITY_MODEL } from "@/lib/amugoto/prompt";
+import { normalizeTechStackIds } from "@/lib/amugoto/stacks";
 import { isToolId } from "@/lib/amugoto/tools";
 import type {
   AmugotoResult,
@@ -17,6 +18,7 @@ export async function POST(request: Request) {
     const body = (await request.json()) as {
       idea?: unknown;
       selectedTool?: unknown;
+      selectedTechStacks?: unknown;
       result?: unknown;
       detailedAnswers?: Partial<Record<keyof DetailedBriefAnswers, unknown>>;
     };
@@ -25,6 +27,7 @@ export async function POST(request: Request) {
     const selectedTool = isToolId(body.selectedTool)
       ? body.selectedTool
       : "lovable";
+    const selectedTechStacks = normalizeTechStackIds(body.selectedTechStacks);
     const detailedAnswers = normalizeDetailedAnswers(body.detailedAnswers);
     const result = normalizeAmugotoResult(body.result);
 
@@ -52,6 +55,7 @@ export async function POST(request: Request) {
     const prompt = buildDeepSecurityReportPrompt(
       idea,
       selectedTool,
+      selectedTechStacks,
       detailedAnswers,
       result
     );

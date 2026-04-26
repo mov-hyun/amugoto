@@ -10,6 +10,7 @@ import { LoadingPromoCard } from "@/components/home/loading-promo-card";
 import { ResultSections } from "@/components/home/result-sections";
 import { EMPTY_DETAILED_BRIEF_ANSWERS } from "@/lib/amugoto/details";
 import { getIndustryExampleById } from "@/lib/amugoto/examples";
+import type { TechStackId } from "@/lib/amugoto/stacks";
 import type { ToolId } from "@/lib/amugoto/tools";
 import type { AmugotoResult, DetailedBriefAnswers } from "@/types/amugoto";
 
@@ -26,6 +27,8 @@ export function StartWorkspace({
     useState<DetailedBriefAnswers>(EMPTY_DETAILED_BRIEF_ANSWERS);
   const [selectedTool, setSelectedTool] = useState<ToolId>("lovable");
   const [submittedTool, setSubmittedTool] = useState<ToolId>("lovable");
+  const [selectedTechStacks, setSelectedTechStacks] = useState<TechStackId[]>([]);
+  const [submittedTechStacks, setSubmittedTechStacks] = useState<TechStackId[]>([]);
   const [detailedAnswers, setDetailedAnswers] = useState<DetailedBriefAnswers>(
     EMPTY_DETAILED_BRIEF_ANSWERS
   );
@@ -47,6 +50,8 @@ export function StartWorkspace({
         setSubmittedDetailedAnswers(EMPTY_DETAILED_BRIEF_ANSWERS);
         setSelectedTool("lovable");
         setSubmittedTool("lovable");
+        setSelectedTechStacks([]);
+        setSubmittedTechStacks([]);
         setDetailedAnswers(EMPTY_DETAILED_BRIEF_ANSWERS);
         setResult(null);
         setError("");
@@ -64,6 +69,8 @@ export function StartWorkspace({
     setSelectedTool(selectedExample.tool);
     setSubmittedIdea("");
     setSubmittedTool(selectedExample.tool);
+    setSelectedTechStacks(selectedExample.techStacks);
+    setSubmittedTechStacks(selectedExample.techStacks);
     setDetailedAnswers(selectedExample.detailedAnswers);
     setResult(null);
     setError("");
@@ -98,6 +105,14 @@ export function StartWorkspace({
     }));
   }
 
+  function toggleTechStack(stackId: TechStackId) {
+    setSelectedTechStacks((current) =>
+      current.includes(stackId)
+        ? current.filter((item) => item !== stackId)
+        : [...current, stackId]
+    );
+  }
+
   async function generateGuide() {
     const normalizedIdea = idea.trim();
 
@@ -109,6 +124,7 @@ export function StartWorkspace({
     let nextSubmittedIdea = normalizedIdea;
     const nextSubmittedDetailedAnswers = { ...detailedAnswers };
     let nextSubmittedTool = selectedTool;
+    const nextSubmittedTechStacks = [...selectedTechStacks];
 
     setLoading(true);
     setResult(null);
@@ -123,6 +139,7 @@ export function StartWorkspace({
         body: JSON.stringify({
           idea: normalizedIdea,
           selectedTool,
+          selectedTechStacks,
           detailedAnswers,
         }),
       });
@@ -159,6 +176,7 @@ export function StartWorkspace({
         setSubmittedIdea(nextSubmittedIdea);
         setSubmittedDetailedAnswers(nextSubmittedDetailedAnswers);
         setSubmittedTool(nextSubmittedTool);
+        setSubmittedTechStacks(nextSubmittedTechStacks);
         setResult(nextResult);
       }
     } finally {
@@ -199,9 +217,11 @@ export function StartWorkspace({
                 idea={idea}
                 loading={loading}
                 selectedTool={selectedTool}
+                selectedTechStacks={selectedTechStacks}
                 detailedAnswers={detailedAnswers}
                 onIdeaChange={setIdea}
                 onToolChange={setSelectedTool}
+                onTechStackToggle={toggleTechStack}
                 onDetailedAnswerChange={updateDetailedAnswer}
                 onSubmit={generateGuide}
               />
@@ -224,6 +244,7 @@ export function StartWorkspace({
                   result={result}
                   originalIdea={submittedIdea || idea.trim()}
                   selectedTool={submittedTool}
+                  selectedTechStacks={submittedTechStacks}
                   submittedDetailedAnswers={submittedDetailedAnswers}
                 />
               )}
@@ -235,9 +256,11 @@ export function StartWorkspace({
               idea={idea}
               loading={loading}
               selectedTool={selectedTool}
+              selectedTechStacks={selectedTechStacks}
               detailedAnswers={detailedAnswers}
               onIdeaChange={setIdea}
               onToolChange={setSelectedTool}
+              onTechStackToggle={toggleTechStack}
               onDetailedAnswerChange={updateDetailedAnswer}
               onSubmit={generateGuide}
             />

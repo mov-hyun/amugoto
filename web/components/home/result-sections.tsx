@@ -10,6 +10,7 @@ import { PackageCopyCard } from "@/components/home/package-copy-card";
 import { RolePermissionMatrix } from "@/components/home/role-permission-matrix";
 import { SectionCard } from "@/components/home/section-card";
 import { TransformationCompare } from "@/components/home/transformation-compare";
+import type { TechStackId } from "@/lib/amugoto/stacks";
 import { getToolConfig, type ToolId } from "@/lib/amugoto/tools";
 import type { AmugotoResult, DetailedBriefAnswers } from "@/types/amugoto";
 
@@ -17,11 +18,13 @@ export function ResultSections({
   result,
   originalIdea,
   selectedTool,
+  selectedTechStacks,
   submittedDetailedAnswers,
 }: {
   result: AmugotoResult;
   originalIdea: string;
   selectedTool: ToolId;
+  selectedTechStacks: TechStackId[];
   submittedDetailedAnswers: DetailedBriefAnswers;
 }) {
   const [activeTab, setActiveTab] = useState<"analysis" | "guide">("analysis");
@@ -97,6 +100,7 @@ export function ResultSections({
             result={result}
             originalIdea={originalIdea}
             selectedTool={selectedTool}
+            selectedTechStacks={selectedTechStacks}
             submittedDetailedAnswers={submittedDetailedAnswers}
           />
 

@@ -4,6 +4,11 @@ import {
   getToolsByAudience,
   type ToolId,
 } from "@/lib/amugoto/tools";
+import {
+  TECH_STACK_GROUPS,
+  getTechStackById,
+  type TechStackId,
+} from "@/lib/amugoto/stacks";
 import { DETAIL_QUESTION_CONFIG, DETAIL_SECTION_COPY } from "@/lib/amugoto/details";
 import type { DetailedBriefAnswers } from "@/types/amugoto";
 import { useEffect, useState } from "react";
@@ -12,9 +17,11 @@ type IdeaInputPanelProps = {
   idea: string;
   loading: boolean;
   selectedTool: ToolId;
+  selectedTechStacks: TechStackId[];
   detailedAnswers: DetailedBriefAnswers;
   onIdeaChange: (value: string) => void;
   onToolChange: (toolId: ToolId) => void;
+  onTechStackToggle: (stackId: TechStackId) => void;
   onDetailedAnswerChange: (
     key: keyof DetailedBriefAnswers,
     value: string
@@ -26,9 +33,11 @@ export function IdeaInputPanel({
   idea,
   loading,
   selectedTool,
+  selectedTechStacks,
   detailedAnswers,
   onIdeaChange,
   onToolChange,
+  onTechStackToggle,
   onDetailedAnswerChange,
   onSubmit,
 }: IdeaInputPanelProps) {
@@ -100,6 +109,74 @@ export function IdeaInputPanel({
           <p className="mt-2 text-sm leading-6 text-zinc-400">
             추천 대상: {selectedToolConfig.recommendedFor}
           </p>
+        </div>
+
+        <div className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-950 p-4">
+          <p className="text-sm font-semibold text-zinc-100">
+            어떤 기술 스택으로 만들 건가요?
+          </p>
+          <p className="mt-2 text-sm leading-6 text-zinc-400">
+            선택한 스택이 있으면 보안 분석과 심층 리포트가 더 구체적으로 나옵니다.
+            모르면 비워둬도 자동으로 추정합니다.
+          </p>
+
+          <div className="mt-4 space-y-4">
+            {TECH_STACK_GROUPS.map((group) => (
+              <div key={group.key}>
+                <p className="text-xs font-semibold tracking-[0.16em] text-zinc-500">
+                  {group.title}
+                </p>
+                <p className="mt-1 text-xs leading-5 text-zinc-500">
+                  {group.description}
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {group.stacks.map((stack) => {
+                    const active = selectedTechStacks.includes(stack.id);
+
+                    return (
+                      <button
+                        key={stack.id}
+                        onClick={() => onTechStackToggle(stack.id)}
+                        className={`rounded-full border px-3 py-2 text-xs transition ${
+                          active
+                            ? "border-emerald-500/60 bg-emerald-500/15 text-white"
+                            : "border-zinc-800 bg-zinc-900 text-zinc-300 hover:border-zinc-700"
+                        }`}
+                      >
+                        {stack.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4">
+            <p className="text-xs font-semibold tracking-[0.16em] text-emerald-200">
+              현재 선택한 스택
+            </p>
+            {selectedTechStacks.length > 0 ? (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {selectedTechStacks.map((stackId) => {
+                  const stack = getTechStackById(stackId);
+
+                  return (
+                    <span
+                      key={stackId}
+                      className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-100"
+                    >
+                      {stack.label}
+                    </span>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="mt-2 text-sm leading-6 text-zinc-300">
+                아직 선택한 스택이 없습니다. 비워두면 분석 시 자동으로 추정합니다.
+              </p>
+            )}
+          </div>
         </div>
       </div>
 

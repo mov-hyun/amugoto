@@ -1,9 +1,14 @@
 import { formatDetailedBriefAnswers } from "@/lib/amugoto/details";
+import {
+  formatSelectedTechStacks,
+  type TechStackId,
+} from "@/lib/amugoto/stacks";
 import { getToolConfig, type ToolId } from "@/lib/amugoto/tools";
 import type {
   AmugotoResult,
   DeepSecurityAttackScenario,
   DeepSecurityControlBlueprint,
+  DeepSecurityExecutionTicket,
   DeepSecurityReport,
   DeepSecurityStackAssumption,
   DeepSecurityStackGuide,
@@ -151,6 +156,56 @@ function normalizeControlBlueprint(
   };
 }
 
+function normalizeExecutionTicket(
+  value: unknown
+): DeepSecurityExecutionTicket | null {
+  const record = asRecord(value);
+
+  if (!record) {
+    return null;
+  }
+
+  const id = asString(record.id);
+  const owner = asString(record.owner) as DeepSecurityExecutionTicket["owner"];
+  const priority = asString(
+    record.priority
+  ) as DeepSecurityExecutionTicket["priority"];
+  const title = asString(record.title);
+  const rationale = asString(record.rationale);
+  const tasks = asStringArray(record.tasks);
+  const acceptanceCriteria = asStringArray(record.acceptanceCriteria);
+  const references = asStringArray(record.references);
+
+  if (
+    !["frontend", "backend", "qa", "ops"].includes(owner) ||
+    !["P0", "P1", "P2"].includes(priority)
+  ) {
+    return null;
+  }
+
+  if (
+    !id &&
+    !title &&
+    !rationale &&
+    tasks.length === 0 &&
+    acceptanceCriteria.length === 0 &&
+    references.length === 0
+  ) {
+    return null;
+  }
+
+  return {
+    id: id || `${owner}-${title}`,
+    owner,
+    priority,
+    title,
+    rationale,
+    tasks,
+    acceptanceCriteria,
+    references,
+  };
+}
+
 function getToolStackContext(selectedTool: ToolId) {
   switch (selectedTool) {
     case "lovable":
@@ -189,11 +244,13 @@ function getToolStackContext(selectedTool: ToolId) {
 export function buildDeepSecurityReportPrompt(
   idea: string,
   selectedTool: ToolId,
+  selectedTechStacks: TechStackId[],
   detailedAnswers: DetailedBriefAnswers,
   result: AmugotoResult
 ) {
   const tool = getToolConfig(selectedTool);
   const formattedDetails = formatDetailedBriefAnswers(detailedAnswers);
+  const formattedTechStacks = formatSelectedTechStacks(selectedTechStacks);
   const currentResult = JSON.stringify(result, null, 2);
   const stackContext = getToolStackContext(selectedTool)
     .map((item) => `- ${item}`)
@@ -215,6 +272,9 @@ export function buildDeepSecurityReportPrompt(
 
 가능성이 높은 구현 스택 가정:
 ${stackContext}
+
+사용자가 고른 기술 스택:
+${formattedTechStacks}
 
 원래 사용자 아이디어:
 ${idea}
@@ -248,10 +308,16 @@ ${currentResult}
 
 구체화 원칙:
 - 사용자가 스택을 명시하지 않았으면 "가정한 스택"을 먼저 적고, 가정 이유를 설명한다.
+- 사용자가 고른 기술 스택이 있으면 그것을 우선 기준으로 삼고, 필요한 보조 가정만 추가한다.
 - 해결책은 반드시 서버 기준 enforcement point를 포함한다.
 - 가능하면 Next.js / React / Route Handler / Server Action / Supabase / Postgres / Prisma / Express / NestJS / Django / Spring Boot / Stripe / 토스페이먼츠 / S3류 업로드 흐름 중 무엇에 해당하는지 짚는다.
 - "프론트에서 숨기기" 같은 표현은 금지한다. 서버 검증, 정책, 미들웨어, 쿼리 조건, 서명 검증, allowlist, rate limit, idempotency, audit log처럼 구현 가능한 통제로 적는다.
 - 개발자가 자주 하는 실수와 바로 적용할 수정 포인트를 분리해서 적는다.
+- executionTickets는 실제 이슈 트래커에 옮길 수 있게 ticket 단위로 구체적으로 적는다.
+- executionTickets는 Jira나 GitHub Issue에 바로 옮길 수 있게 한 티켓당 하나의 명확한 목표만 담당하도록 적는다.
+- executionTickets의 title은 "추가", "분리", "강제", "검증", "차단", "제한"처럼 바로 행동이 보이는 동사형 표현으로 시작한다.
+- executionTickets의 tasks는 3개 이상, acceptanceCriteria는 2개 이상, references는 1개 이상 넣는다.
+- executionTickets는 프레임워크를 과도하게 단정하지 말되, 선택된 기술 스택이 있으면 그 스택의 구현 경계(예: Route Handler, Server Action, controller, service, middleware, policy, webhook handler, upload endpoint)를 명시한다.
 
 출력 원칙:
 - 한국어로 쓴다.
@@ -262,6 +328,7 @@ ${currentResult}
 - attackScenarios는 최소 4개를 만든다.
 - stackSpecificGuidance는 최소 2개 이상의 스택/프레임워크 관점으로 쓴다.
 - controlBlueprints는 최소 4개를 만든다.
+- executionTickets는 최소 6개를 만들고, frontend / backend / qa / ops가 최소 1개씩은 포함되게 한다.
 - verificationChecklist는 출시 전 개발자/QA가 직접 점검할 수 있게 최소 10개를 쓴다.
 - requiredControls는 최소 8개를 쓴다.
 - researchAnchors에는 이 리포트가 어떤 공식 기준을 반영했는지 짧은 한국어 문장으로 적는다.
@@ -298,6 +365,18 @@ JSON schema:
       "implementationNotes": ["구체 구현 포인트"],
       "failureModes": ["빠뜨리면 생기는 문제"],
       "validationSteps": ["개발자/QA가 확인하는 방법"]
+    }
+  ],
+  "executionTickets": [
+    {
+      "id": "ticket-1",
+      "owner": "frontend | backend | qa | ops",
+      "priority": "P0 | P1 | P2",
+      "title": "실행 티켓 제목",
+      "rationale": "왜 이 티켓이 필요한지",
+      "tasks": ["실제로 해야 할 작업"],
+      "acceptanceCriteria": ["완료 조건"],
+      "references": ["연결된 핵심 설계 취약점 또는 통제 기준"]
     }
   ],
   "attackScenarios": [
@@ -349,6 +428,11 @@ export function parseDeepSecurityReport(rawText: string): DeepSecurityReport {
       ? record.controlBlueprints
           .map(normalizeControlBlueprint)
           .filter((item): item is DeepSecurityControlBlueprint => item !== null)
+      : [],
+    executionTickets: Array.isArray(record.executionTickets)
+      ? record.executionTickets
+          .map(normalizeExecutionTicket)
+          .filter((item): item is DeepSecurityExecutionTicket => item !== null)
       : [],
     attackScenarios: Array.isArray(record.attackScenarios)
       ? record.attackScenarios

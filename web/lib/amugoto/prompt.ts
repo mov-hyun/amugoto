@@ -1,4 +1,5 @@
 import { formatDetailedBriefAnswers } from "@/lib/amugoto/details";
+import { formatSelectedTechStacks, type TechStackId } from "@/lib/amugoto/stacks";
 import { getToolConfig, type ToolId } from "@/lib/amugoto/tools";
 import type { DetailedBriefAnswers } from "@/types/amugoto";
 
@@ -8,10 +9,12 @@ export const AMUGOTO_DEEP_SECURITY_MODEL = "gemini-3-pro-preview";
 export function buildAmugotoPrompt(
   idea: string,
   selectedTool: ToolId,
+  selectedTechStacks: TechStackId[],
   detailedAnswers: DetailedBriefAnswers
 ) {
   const tool = getToolConfig(selectedTool);
   const formattedDetails = formatDetailedBriefAnswers(detailedAnswers);
+  const formattedTechStacks = formatSelectedTechStacks(selectedTechStacks);
 
   return `
 너는 AMUGOTO의 앱 요구사항 안전 분석 엔진이다.
@@ -27,6 +30,9 @@ export function buildAmugotoPrompt(
 - 도구 특성: ${tool.shortDescription}
 - 추천 사용 맥락: ${tool.recommendedFor}
 - 프롬프트 스타일: ${tool.promptStyle}
+
+사용자가 고른 기술 스택:
+${formattedTechStacks}
 
 사용자 입력:
 ${idea}
@@ -67,6 +73,7 @@ ${formattedDetails || "- 사용자가 추가 답변을 입력하지 않았습니
 - businessAbuseSafeguards에는 중복 신청, 무제한 호출, 비용 폭탄을 줄이는 방어 규칙을 적는다.
 - externalTrustRules에는 외부 API, 웹훅, URL fetch를 어디까지 신뢰하면 안 되는지 적는다.
 - agentSafetyRules에는 ${tool.label} 같은 AI 도구를 쓸 때 검토가 필요한 제약을 적는다.
+- 사용자가 고른 기술 스택이 있으면 그 스택 기준으로 더 구체적으로 쓰고, 없으면 안전하게 추정한다.
 - JSON만 출력한다.
 - markdown code fence를 절대 쓰지 않는다.
 - JSON 바깥의 설명을 절대 쓰지 않는다.
