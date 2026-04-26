@@ -6,11 +6,14 @@ import { EmptyState } from "@/components/home/empty-state";
 import { ErrorBanner } from "@/components/home/error-banner";
 import { HomeHeader } from "@/components/home/home-header";
 import { IdeaInputPanel } from "@/components/home/idea-input-panel";
+import { LoadingPromoCard } from "@/components/home/loading-promo-card";
 import { ResultSections } from "@/components/home/result-sections";
 import { EMPTY_DETAILED_BRIEF_ANSWERS } from "@/lib/amugoto/details";
 import { getIndustryExampleById } from "@/lib/amugoto/examples";
 import type { ToolId } from "@/lib/amugoto/tools";
 import type { AmugotoResult, DetailedBriefAnswers } from "@/types/amugoto";
+
+const MIN_ANALYSIS_DISPLAY_MS = 5000;
 
 export function StartWorkspace({
   initialExampleId,
@@ -97,6 +100,12 @@ export function StartWorkspace({
 
     if (!normalizedIdea) return;
 
+    const startedAt = Date.now();
+    let nextError = "";
+    let nextResult: AmugotoResult | null = null;
+    let nextSubmittedIdea = normalizedIdea;
+    let nextSubmittedTool = selectedTool;
+
     setLoading(true);
     setResult(null);
     setError("");
@@ -117,15 +126,36 @@ export function StartWorkspace({
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || "오류가 발생했습니다.");
+        nextError = data.error || "오류가 발생했습니다.";
+      } else {
+        nextSubmittedIdea = normalizedIdea;
+        nextSubmittedTool = selectedTool;
+        nextResult = data.result;
+      }
+    } catch {
+      nextError = "요청 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+    }
+
+    const remainingTime = Math.max(
+      0,
+      MIN_ANALYSIS_DISPLAY_MS - (Date.now() - startedAt)
+    );
+
+    if (remainingTime > 0) {
+      await wait(remainingTime);
+    }
+
+    try {
+      if (nextError) {
+        setError(nextError);
         return;
       }
 
-      setSubmittedIdea(normalizedIdea);
-      setSubmittedTool(selectedTool);
-      setResult(data.result);
-    } catch {
-      setError("요청 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+      if (nextResult) {
+        setSubmittedIdea(nextSubmittedIdea);
+        setSubmittedTool(nextSubmittedTool);
+        setResult(nextResult);
+      }
     } finally {
       setLoading(false);
     }
@@ -212,6 +242,14 @@ export function StartWorkspace({
           </div>
         )}
       </section>
+
+      <LoadingPromoCard visible={loading} selectedTool={selectedTool} />
     </main>
   );
+}
+
+function wait(durationMs: number) {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, durationMs);
+  });
 }
