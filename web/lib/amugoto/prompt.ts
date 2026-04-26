@@ -1,9 +1,16 @@
+import { formatDetailedBriefAnswers } from "@/lib/amugoto/details";
 import { getToolConfig, type ToolId } from "@/lib/amugoto/tools";
+import type { DetailedBriefAnswers } from "@/types/amugoto";
 
 export const AMUGOTO_MODEL = "gemini-3-flash-preview";
 
-export function buildAmugotoPrompt(idea: string, selectedTool: ToolId) {
+export function buildAmugotoPrompt(
+  idea: string,
+  selectedTool: ToolId,
+  detailedAnswers: DetailedBriefAnswers
+) {
   const tool = getToolConfig(selectedTool);
+  const formattedDetails = formatDetailedBriefAnswers(detailedAnswers);
 
   return `
 너는 AMUGOTO의 앱 요구사항 안전 분석 엔진이다.
@@ -22,6 +29,9 @@ export function buildAmugotoPrompt(idea: string, selectedTool: ToolId) {
 
 사용자 입력:
 ${idea}
+
+추가 문맥:
+${formattedDetails || "- 사용자가 추가 답변을 입력하지 않았습니다."}
 
 반드시 확인할 리스크:
 - 카드번호 직접 저장 또는 직접 결제 구현

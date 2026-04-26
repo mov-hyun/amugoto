@@ -5,6 +5,7 @@ import { useState } from "react";
 import { BuilderPromptsSection } from "@/components/home/builder-prompts-section";
 import { ListCard } from "@/components/home/list-card";
 import { LaunchReadinessCard } from "@/components/home/launch-readiness-card";
+import { PackageCopyCard } from "@/components/home/package-copy-card";
 import { SectionCard } from "@/components/home/section-card";
 import { TransformationCompare } from "@/components/home/transformation-compare";
 import { getToolConfig, type ToolId } from "@/lib/amugoto/tools";
@@ -81,6 +82,8 @@ export function ResultSections({
         </>
       ) : (
         <>
+          <PackageCopyCard result={result} tool={selectedToolConfig} />
+
           <TransformationCompare originalIdea={originalIdea} result={result} />
 
           <LaunchReadinessCard result={result} />

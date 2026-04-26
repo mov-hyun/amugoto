@@ -15,6 +15,16 @@ export type BuilderPrompt = {
   prompt: string;
 };
 
+export type DetailedBriefAnswers = {
+  businessType: string;
+  targetUsers: string;
+  coreAction: string;
+  adminNeeds: string;
+  requiredData: string;
+  mustHaveFeatures: string;
+  blockedData: string;
+};
+
 export type AmugotoResult = {
   riskLevel: string;
   oneLineSummary: string;
