@@ -22,6 +22,8 @@ export function StartWorkspace({
 }) {
   const [idea, setIdea] = useState("");
   const [submittedIdea, setSubmittedIdea] = useState("");
+  const [submittedDetailedAnswers, setSubmittedDetailedAnswers] =
+    useState<DetailedBriefAnswers>(EMPTY_DETAILED_BRIEF_ANSWERS);
   const [selectedTool, setSelectedTool] = useState<ToolId>("lovable");
   const [submittedTool, setSubmittedTool] = useState<ToolId>("lovable");
   const [detailedAnswers, setDetailedAnswers] = useState<DetailedBriefAnswers>(
@@ -42,6 +44,7 @@ export function StartWorkspace({
       if (appliedExampleId !== null) {
         setIdea("");
         setSubmittedIdea("");
+        setSubmittedDetailedAnswers(EMPTY_DETAILED_BRIEF_ANSWERS);
         setSelectedTool("lovable");
         setSubmittedTool("lovable");
         setDetailedAnswers(EMPTY_DETAILED_BRIEF_ANSWERS);
@@ -104,6 +107,7 @@ export function StartWorkspace({
     let nextError = "";
     let nextResult: AmugotoResult | null = null;
     let nextSubmittedIdea = normalizedIdea;
+    const nextSubmittedDetailedAnswers = { ...detailedAnswers };
     let nextSubmittedTool = selectedTool;
 
     setLoading(true);
@@ -153,6 +157,7 @@ export function StartWorkspace({
 
       if (nextResult) {
         setSubmittedIdea(nextSubmittedIdea);
+        setSubmittedDetailedAnswers(nextSubmittedDetailedAnswers);
         setSubmittedTool(nextSubmittedTool);
         setResult(nextResult);
       }
@@ -219,6 +224,7 @@ export function StartWorkspace({
                   result={result}
                   originalIdea={submittedIdea || idea.trim()}
                   selectedTool={submittedTool}
+                  submittedDetailedAnswers={submittedDetailedAnswers}
                 />
               )}
             </section>

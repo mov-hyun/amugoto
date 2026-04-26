@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { BuilderPromptsSection } from "@/components/home/builder-prompts-section";
+import { DeepSecurityReportPanel } from "@/components/home/deep-security-report-panel";
 import { ListCard } from "@/components/home/list-card";
 import { LaunchReadinessCard } from "@/components/home/launch-readiness-card";
 import { PackageCopyCard } from "@/components/home/package-copy-card";
@@ -10,16 +11,18 @@ import { RolePermissionMatrix } from "@/components/home/role-permission-matrix";
 import { SectionCard } from "@/components/home/section-card";
 import { TransformationCompare } from "@/components/home/transformation-compare";
 import { getToolConfig, type ToolId } from "@/lib/amugoto/tools";
-import type { AmugotoResult } from "@/types/amugoto";
+import type { AmugotoResult, DetailedBriefAnswers } from "@/types/amugoto";
 
 export function ResultSections({
   result,
   originalIdea,
   selectedTool,
+  submittedDetailedAnswers,
 }: {
   result: AmugotoResult;
   originalIdea: string;
   selectedTool: ToolId;
+  submittedDetailedAnswers: DetailedBriefAnswers;
 }) {
   const [activeTab, setActiveTab] = useState<"analysis" | "guide">("analysis");
   const selectedToolConfig = getToolConfig(selectedTool);
@@ -89,6 +92,13 @@ export function ResultSections({
       ) : (
         <>
           <PackageCopyCard result={result} tool={selectedToolConfig} />
+
+          <DeepSecurityReportPanel
+            result={result}
+            originalIdea={originalIdea}
+            selectedTool={selectedTool}
+            submittedDetailedAnswers={submittedDetailedAnswers}
+          />
 
           <TransformationCompare originalIdea={originalIdea} result={result} />
 

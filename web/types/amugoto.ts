@@ -22,6 +22,52 @@ export type RolePermissionRule = {
   mustNotAccess: string[];
 };
 
+export type DeepSecurityAttackScenario = {
+  title: string;
+  attackerGoal: string;
+  attackPath: string;
+  impact: string;
+  recommendedDefense: string;
+};
+
+export type DeepSecurityStackAssumption = {
+  stack: string;
+  reason: string;
+};
+
+export type DeepSecurityStackGuide = {
+  stack: string;
+  concreteActions: string[];
+  commonMistakes: string[];
+};
+
+export type DeepSecurityControlBlueprint = {
+  title: string;
+  objective: string;
+  implementationNotes: string[];
+  failureModes: string[];
+  validationSteps: string[];
+};
+
+export type DeepSecurityReport = {
+  overallAssessment: string;
+  executiveSummary: string;
+  stackAssumptions: DeepSecurityStackAssumption[];
+  releaseBlockers: string[];
+  criticalFindings: string[];
+  trustBoundaries: string[];
+  roleBoundaryWarnings: string[];
+  dangerousClientFields: string[];
+  abuseCases: string[];
+  stackSpecificGuidance: DeepSecurityStackGuide[];
+  controlBlueprints: DeepSecurityControlBlueprint[];
+  attackScenarios: DeepSecurityAttackScenario[];
+  requiredControls: string[];
+  verificationChecklist: string[];
+  agentWarnings: string[];
+  researchAnchors: string[];
+};
+
 export type DetailedBriefAnswers = {
   businessType: string;
   targetUsers: string;

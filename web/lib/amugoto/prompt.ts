@@ -3,6 +3,7 @@ import { getToolConfig, type ToolId } from "@/lib/amugoto/tools";
 import type { DetailedBriefAnswers } from "@/types/amugoto";
 
 export const AMUGOTO_MODEL = "gemini-3-flash-preview";
+export const AMUGOTO_DEEP_SECURITY_MODEL = "gemini-3-pro-preview";
 
 export function buildAmugotoPrompt(
   idea: string,
