@@ -6,6 +6,7 @@ import { BuilderPromptsSection } from "@/components/home/builder-prompts-section
 import { ListCard } from "@/components/home/list-card";
 import { LaunchReadinessCard } from "@/components/home/launch-readiness-card";
 import { PackageCopyCard } from "@/components/home/package-copy-card";
+import { RolePermissionMatrix } from "@/components/home/role-permission-matrix";
 import { SectionCard } from "@/components/home/section-card";
 import { TransformationCompare } from "@/components/home/transformation-compare";
 import { getToolConfig, type ToolId } from "@/lib/amugoto/tools";
@@ -79,6 +80,11 @@ export function ResultSections({
               ))}
             </div>
           </SectionCard>
+
+          <ListCard
+            title="놓치기 쉬운 설계 리스크"
+            items={result.hiddenDesignRisks}
+          />
         </>
       ) : (
         <>
@@ -106,6 +112,27 @@ export function ResultSections({
           </div>
 
           <ListCard title="관리자 화면과 권한" items={result.adminAndPermission} />
+
+          <RolePermissionMatrix items={result.rolePermissionMatrix} />
+
+          <div className="grid gap-5 md:grid-cols-2">
+            <ListCard
+              title="클라이언트가 보내면 안 되는 필드"
+              items={result.forbiddenClientFields}
+            />
+            <ListCard
+              title="남용과 비용 폭탄 방어 규칙"
+              items={result.businessAbuseSafeguards}
+            />
+            <ListCard
+              title="외부 API / 웹훅 신뢰 규칙"
+              items={result.externalTrustRules}
+            />
+            <ListCard
+              title="AI 코딩 툴 안전 사용 규칙"
+              items={result.agentSafetyRules}
+            />
+          </div>
 
           <SectionCard title="위험한 요구를 안전하게 바꾸기">
             <div className="space-y-3">

@@ -2,6 +2,7 @@ import type {
   AmugotoResult,
   BuilderPrompt,
   Risk,
+  RolePermissionRule,
   SafeAlternative,
 } from "@/types/amugoto";
 
@@ -100,6 +101,30 @@ function normalizeBuilderPrompt(value: unknown): BuilderPrompt | null {
   };
 }
 
+function normalizeRolePermissionRule(value: unknown): RolePermissionRule | null {
+  const record = asRecord(value);
+
+  if (!record) {
+    return null;
+  }
+
+  const role = asString(record.role);
+  const canView = asStringArray(record.canView);
+  const canEdit = asStringArray(record.canEdit);
+  const mustNotAccess = asStringArray(record.mustNotAccess);
+
+  if (!role && canView.length === 0 && canEdit.length === 0 && mustNotAccess.length === 0) {
+    return null;
+  }
+
+  return {
+    role,
+    canView,
+    canEdit,
+    mustNotAccess,
+  };
+}
+
 export function parseAmugotoResult(rawText: string): AmugotoResult {
   const cleaned = stripCodeFence(rawText);
   const parsed = JSON.parse(cleaned) as unknown;
@@ -117,6 +142,7 @@ export function parseAmugotoResult(rawText: string): AmugotoResult {
           .map(normalizeRisk)
           .filter((item): item is Risk => item !== null)
       : [],
+    hiddenDesignRisks: asStringArray(record.hiddenDesignRisks),
     easyExplanation: asString(record.easyExplanation),
     safeAppSummary: asString(record.safeAppSummary),
     mvpFeatures: asStringArray(record.mvpFeatures),
@@ -124,6 +150,15 @@ export function parseAmugotoResult(rawText: string): AmugotoResult {
     allowedData: asStringArray(record.allowedData),
     blockedData: asStringArray(record.blockedData),
     adminAndPermission: asStringArray(record.adminAndPermission),
+    rolePermissionMatrix: Array.isArray(record.rolePermissionMatrix)
+      ? record.rolePermissionMatrix
+          .map(normalizeRolePermissionRule)
+          .filter((item): item is RolePermissionRule => item !== null)
+      : [],
+    forbiddenClientFields: asStringArray(record.forbiddenClientFields),
+    businessAbuseSafeguards: asStringArray(record.businessAbuseSafeguards),
+    externalTrustRules: asStringArray(record.externalTrustRules),
+    agentSafetyRules: asStringArray(record.agentSafetyRules),
     safeAlternatives: Array.isArray(record.safeAlternatives)
       ? record.safeAlternatives
           .map(normalizeSafeAlternative)

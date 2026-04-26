@@ -29,8 +29,8 @@ export function PackageCopyCard({
         <div className="max-w-3xl">
           <p className="text-sm leading-6 text-zinc-300">
             안전한 앱 요약, MVP 범위, 데이터 정책, 관리자 권한, {tool.label}용
-            프롬프트, 테스트 체크리스트를 하나의 문서로 묶어 바로 복사할 수
-            있습니다.
+            프롬프트, 테스트 체크리스트뿐 아니라 권한 매트릭스와 금지 필드
+            규칙까지 하나의 문서로 묶어 바로 복사할 수 있습니다.
           </p>
           <p className="mt-2 text-xs leading-5 text-zinc-500">
             추천 사용: {tool.label}에 그대로 붙여넣거나, 팀원과 공유용 주문서로

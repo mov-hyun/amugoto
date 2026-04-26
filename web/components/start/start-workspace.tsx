@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { EmptyState } from "@/components/home/empty-state";
 import { ErrorBanner } from "@/components/home/error-banner";
@@ -28,6 +28,9 @@ export function StartWorkspace({
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [appliedExampleId, setAppliedExampleId] = useState<string | null>(null);
+  const [highlightResult, setHighlightResult] = useState(false);
+  const hasResult = result !== null;
+  const resultPanelRef = useRef<HTMLElement | null>(null);
 
   const selectedExample = getIndustryExampleById(initialExampleId ?? null);
 
@@ -60,6 +63,24 @@ export function StartWorkspace({
     setError("");
     setAppliedExampleId(selectedExample.id);
   }, [appliedExampleId, selectedExample]);
+
+  useEffect(() => {
+    if (!result) {
+      return;
+    }
+
+    setHighlightResult(true);
+    resultPanelRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+
+    const timeoutId = window.setTimeout(() => {
+      setHighlightResult(false);
+    }, 1400);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [result]);
 
   function updateDetailedAnswer(
     key: keyof DetailedBriefAnswers,
@@ -116,7 +137,11 @@ export function StartWorkspace({
         <HomeHeader />
 
         {selectedExample ? (
-          <div className="mb-6 rounded-3xl border border-emerald-500/30 bg-emerald-500/10 p-5">
+          <div
+            className={`mb-6 rounded-3xl border border-emerald-500/30 bg-emerald-500/10 p-5 transition-all duration-500 ease-out ${
+              hasResult ? "" : "mx-auto w-full max-w-4xl"
+            }`}
+          >
             <p className="text-sm font-semibold text-emerald-200">
               업종별 예시 불러옴
             </p>
@@ -132,30 +157,60 @@ export function StartWorkspace({
           </div>
         ) : null}
 
-        <div className="grid gap-6 lg:grid-cols-[0.9fr_1.4fr]">
-          <IdeaInputPanel
-            idea={idea}
-            loading={loading}
-            selectedTool={selectedTool}
-            detailedAnswers={detailedAnswers}
-            onIdeaChange={setIdea}
-            onToolChange={setSelectedTool}
-            onDetailedAnswerChange={updateDetailedAnswer}
-            onSubmit={generateGuide}
-          />
-
-          <section className="space-y-5">
-            {!result && !error && <EmptyState />}
-            {error && <ErrorBanner message={error} />}
-            {result && (
-              <ResultSections
-                result={result}
-                originalIdea={submittedIdea || idea.trim()}
-                selectedTool={submittedTool}
+        {hasResult ? (
+          <div className="grid gap-6 lg:grid-cols-[0.9fr_1.4fr] lg:items-start">
+            <div className="animate-soft-slide-in">
+              <IdeaInputPanel
+                idea={idea}
+                loading={loading}
+                selectedTool={selectedTool}
+                detailedAnswers={detailedAnswers}
+                onIdeaChange={setIdea}
+                onToolChange={setSelectedTool}
+                onDetailedAnswerChange={updateDetailedAnswer}
+                onSubmit={generateGuide}
               />
-            )}
-          </section>
-        </div>
+            </div>
+
+            <section
+              ref={resultPanelRef}
+              className={`animate-fade-up-in space-y-5 ${
+                highlightResult ? "animate-result-spotlight" : ""
+              }`}
+            >
+              {highlightResult ? (
+                <div className="inline-flex items-center rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-xs font-semibold text-violet-200">
+                  새 결과가 생성되었습니다
+                </div>
+              ) : null}
+              {error && <ErrorBanner message={error} />}
+              {result && (
+                <ResultSections
+                  result={result}
+                  originalIdea={submittedIdea || idea.trim()}
+                  selectedTool={submittedTool}
+                />
+              )}
+            </section>
+          </div>
+        ) : (
+          <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 transition-all duration-500 ease-out">
+            <IdeaInputPanel
+              idea={idea}
+              loading={loading}
+              selectedTool={selectedTool}
+              detailedAnswers={detailedAnswers}
+              onIdeaChange={setIdea}
+              onToolChange={setSelectedTool}
+              onDetailedAnswerChange={updateDetailedAnswer}
+              onSubmit={generateGuide}
+            />
+
+            <div className="animate-fade-up-in">
+              {error ? <ErrorBanner message={error} /> : <EmptyState />}
+            </div>
+          </div>
+        )}
       </section>
     </main>
   );

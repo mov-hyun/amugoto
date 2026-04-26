@@ -9,10 +9,16 @@ export function ListCard({
   items?: string[];
   checklist?: boolean;
 }) {
+  const normalizedItems = (items || []).map((item) => item.trim()).filter(Boolean);
+
+  if (normalizedItems.length === 0) {
+    return null;
+  }
+
   return (
     <SectionCard title={title}>
       <ul className="space-y-2">
-        {(items || []).map((item, index) => (
+        {normalizedItems.map((item, index) => (
           <li
             key={index}
             className="flex gap-3 rounded-xl bg-zinc-950 px-4 py-3 text-sm leading-6 text-zinc-200"

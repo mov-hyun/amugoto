@@ -15,6 +15,13 @@ export type BuilderPrompt = {
   prompt: string;
 };
 
+export type RolePermissionRule = {
+  role: string;
+  canView: string[];
+  canEdit: string[];
+  mustNotAccess: string[];
+};
+
 export type DetailedBriefAnswers = {
   businessType: string;
   targetUsers: string;
@@ -23,12 +30,21 @@ export type DetailedBriefAnswers = {
   requiredData: string;
   mustHaveFeatures: string;
   blockedData: string;
+  protectedRecords: string;
+  adminOnlyActions: string;
+  forbiddenClientFields: string;
+  abuseProneFlows: string;
+  externalIntegrations: string;
+  serverFetchedUrls: string;
+  tenantIsolationNeeds: string;
+  agentContextSources: string;
 };
 
 export type AmugotoResult = {
   riskLevel: string;
   oneLineSummary: string;
   detectedRisks: Risk[];
+  hiddenDesignRisks: string[];
   easyExplanation: string;
   safeAppSummary: string;
   mvpFeatures: string[];
@@ -36,6 +52,11 @@ export type AmugotoResult = {
   allowedData: string[];
   blockedData: string[];
   adminAndPermission: string[];
+  rolePermissionMatrix: RolePermissionRule[];
+  forbiddenClientFields: string[];
+  businessAbuseSafeguards: string[];
+  externalTrustRules: string[];
+  agentSafetyRules: string[];
   safeAlternatives: SafeAlternative[];
   builderPrompts: BuilderPrompt[];
   testChecklist: string[];

@@ -4,9 +4,9 @@ import {
   getToolsByAudience,
   type ToolId,
 } from "@/lib/amugoto/tools";
-import { DETAIL_QUESTION_CONFIG } from "@/lib/amugoto/details";
+import { DETAIL_QUESTION_CONFIG, DETAIL_SECTION_COPY } from "@/lib/amugoto/details";
 import type { DetailedBriefAnswers } from "@/types/amugoto";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type IdeaInputPanelProps = {
   idea: string;
@@ -132,25 +132,48 @@ export function IdeaInputPanel({
             </p>
           </div>
 
-          <div className="space-y-4">
-            {DETAIL_QUESTION_CONFIG.map((question) => (
-              <label key={question.key} className="block">
-                <span className="block text-sm font-semibold text-zinc-100">
-                  {question.label}
-                </span>
-                <span className="mt-1 block text-xs leading-5 text-zinc-500">
-                  {question.helper}
-                </span>
-                <textarea
-                  value={detailedAnswers[question.key]}
-                  onChange={(event) =>
-                    onDetailedAnswerChange(question.key, event.target.value)
-                  }
-                  placeholder={question.placeholder}
-                  className="mt-2 min-h-24 w-full resize-y rounded-2xl border border-zinc-800 bg-zinc-900 p-3 text-sm leading-6 text-white outline-none transition focus:border-violet-400"
-                />
-              </label>
-            ))}
+          <div className="space-y-5">
+            {(["basic", "security"] as const).map((sectionKey) => {
+              const section = DETAIL_SECTION_COPY[sectionKey];
+              const questions = DETAIL_QUESTION_CONFIG.filter(
+                (question) => question.section === sectionKey
+              );
+
+              return (
+                <div
+                  key={sectionKey}
+                  className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4"
+                >
+                  <p className="text-sm font-semibold text-zinc-100">
+                    {section.title}
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-zinc-500">
+                    {section.description}
+                  </p>
+
+                  <div className="mt-4 space-y-4">
+                    {questions.map((question) => (
+                      <label key={question.key} className="block">
+                        <span className="block text-sm font-semibold text-zinc-100">
+                          {question.label}
+                        </span>
+                        <span className="mt-1 block text-xs leading-5 text-zinc-500">
+                          {question.helper}
+                        </span>
+                        <textarea
+                          value={detailedAnswers[question.key]}
+                          onChange={(event) =>
+                            onDetailedAnswerChange(question.key, event.target.value)
+                          }
+                          placeholder={question.placeholder}
+                          className="mt-2 min-h-24 w-full resize-y rounded-2xl border border-zinc-800 bg-zinc-950 p-3 text-sm leading-6 text-white outline-none transition focus:border-violet-400"
+                        />
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
@@ -158,18 +181,47 @@ export function IdeaInputPanel({
       <button
         onClick={onSubmit}
         disabled={loading || !idea.trim()}
-        className="mt-4 w-full rounded-2xl bg-white px-5 py-4 font-bold text-zinc-950 transition hover:bg-violet-200 disabled:cursor-not-allowed disabled:opacity-50"
+        className={`mt-4 w-full rounded-2xl px-5 py-4 font-bold transition disabled:cursor-not-allowed ${
+          loading
+            ? "loading-gradient-button cursor-wait text-white"
+            : "bg-white text-zinc-950 hover:bg-violet-200 disabled:opacity-50"
+        }`}
       >
-        {loading ? "위험 요소 분석 중..." : "위험 요소 감지하고 안전한 주문서 만들기"}
+        {loading ? (
+          <AnimatedLoadingLabel />
+        ) : (
+          "위험 요소 감지하고 안전한 주문서 만들기"
+        )}
       </button>
 
       <div className="mt-5 rounded-2xl border border-zinc-800 bg-zinc-950 p-4 text-sm leading-6 text-zinc-400">
         <p className="font-semibold text-zinc-200">AMUGOTO가 확인하는 것</p>
         <p className="mt-2">
           카드번호 저장, 과도한 개인정보 수집, 관리자 권한 누락, 고객 데이터
-          노출, 직접 결제 구현 같은 위험한 요구를 먼저 점검합니다.
+          노출, 직접 결제 구현뿐 아니라 권한 분리, 숨은 필드 조작, 외부 연동
+          과신, 비용 폭탄 같은 숨은 설계 리스크도 먼저 점검합니다.
         </p>
       </div>
     </section>
+  );
+}
+
+function AnimatedLoadingLabel() {
+  const frames = [".", "..", "...", ".."];
+  const [frameIndex, setFrameIndex] = useState(0);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setFrameIndex((current) => (current + 1) % frames.length);
+    }, 380);
+
+    return () => window.clearInterval(intervalId);
+  }, [frames.length]);
+
+  return (
+    <span className="inline-flex items-center gap-2">
+      <span className="h-2.5 w-2.5 rounded-full bg-white/85 shadow-[0_0_12px_rgba(255,255,255,0.4)] animate-pulse" />
+      <span>{`위험 요소 분석 중${frames[frameIndex]}`}</span>
+    </span>
   );
 }
